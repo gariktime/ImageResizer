@@ -24,7 +24,7 @@ namespace ImageResizer
     public partial class MainWindow : Window
     {
         private string resizePath = string.Empty;
-        private int maxFileSize = 5000;
+        private int maxFileSize = 250;
 
         public MainWindow()
         {
@@ -56,6 +56,10 @@ namespace ImageResizer
         {
             string[] filePaths = Directory.GetFiles(resizePath, "*.jp*", SearchOption.AllDirectories); //список файлов всех изображений
             List<string> resizeableFiles = ResizeMethods.GetResizeableFiles(filePaths, maxFileSize); //список файлов, подлежащих ресайзу
+            Parallel.ForEach(resizeableFiles, (currentFile) =>
+            {
+                ResizeMethods.ResizeStandart(currentFile, 40L);
+            });
         }
 
 
