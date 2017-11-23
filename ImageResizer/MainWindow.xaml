@@ -9,7 +9,7 @@
     <Grid>
         <DockPanel Margin="5">
             <DockPanel DockPanel.Dock="Top">
-                <TextBox x:Name="txbPath" HorizontalAlignment="Center" Margin="5,0,5,0"  Height="30" Width="460"/>
+                <TextBox x:Name="txbPath" HorizontalAlignment="Center" Margin="5,0,5,0"  Height="30" Width="450"/>
                 <Button x:Name="btnOpenPath" HorizontalAlignment="Right" Width="30" Height="30" Content="..." Click="btnOpenPath_Click"/>
             </DockPanel>
             <DockPanel VerticalAlignment="Top" DockPanel.Dock="Top" Height="30">
@@ -18,8 +18,14 @@
             </DockPanel>
             <DockPanel VerticalAlignment="Top">
                 <StackPanel>
-                    <Label/>
-                    <Label/>
+                    <Label x:Name="labelFilesTotal"/>
+                    <Label x:Name="labelFilesResizeable"/>
+                    <Label x:Name="labelRange1"/>
+                    <Label x:Name="labelRange2"/>
+                    <Label x:Name="labelRange3"/>
+                    <Label x:Name="labelRange4"/>
+                    <Label x:Name="labelRange5"/>
+                    <Label x:Name="labelRange6"/>
                 </StackPanel>
             </DockPanel>
         </DockPanel>

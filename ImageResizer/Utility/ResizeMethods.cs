@@ -14,47 +14,39 @@ namespace ImageResizer
     public class ResizeMethods
     {
         /// <summary>
-        /// Возвращает список полных имён файлов 
+        /// Возвращает список полных имён файлов, подлежащих сжатию и коэффициенты сжатия
         /// </summary>
         /// <param name="filePaths"></param>
         /// <param name="maxFileSize"></param>
         /// <returns></returns>
-        public static List<string> GetResizeableFiles(string[] filePaths, int maxFileSize)
+        public static List<ResizeParameters> GetResizeableFiles(string[] filePaths, int maxFileSize)
         {
-            List<string> result = new List<string>();
+            List<ResizeParameters> result = new List<ResizeParameters>();
 
             Parallel.ForEach(filePaths, (currentFilePath) =>
             {
                 FileInfo fileInfo = new FileInfo(currentFilePath);
+                int fileSize = (int)(fileInfo.Length / 1024);
                 //если размер файла больше заданного, то добавляем в List
-                if (fileInfo.Length / 1024 > maxFileSize)
-                    result.Add(currentFilePath);
+                if (fileSize > maxFileSize)
+                {
+                    if (fileSize >= 200 && fileSize < 400)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 70L });
+                    else if (fileSize >= 400 && fileSize < 600)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 60L });
+                    else if (fileSize >= 600 && fileSize < 1000)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 50L });
+                    else if (fileSize >= 1000 && fileSize < 2000)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 40L });
+                    else if (fileSize >= 2000 && fileSize < 4000)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 30L });
+                    else if (fileSize >= 4000 && fileSize <= 6000)
+                        result.Add(new ResizeParameters() { FilePath = currentFilePath, FileSize = fileSize, ResizeQuality = 20L });
+
+                }
             });
 
             return result;
-        }
-
-        /// <summary>
-        /// Возвращает список полных имён файлов 
-        /// </summary>
-        /// <param name="filePaths"></param>
-        /// <param name="maxFileSize"></param>
-        /// <returns></returns>
-        public static List<ResizeParameters> GetResizeableFiles2(string[] filePaths, int maxFileSize)
-        {
-            List<ResizeParameters> result = new List<ResizeParameters>();
-
-
-
-            return result;
-        }
-
-        public static void ResizeStandart(List<string> filePaths)
-        {
-            //Parallel.ForEach(filePaths, (currentFilePath) =>
-            //{
-            //    ResizeStandart(currentFilePath);
-            //});
         }
 
         /// <summary>
@@ -80,6 +72,7 @@ namespace ImageResizer
                 using (MemoryStream ms = new MemoryStream(bmpData))
                 {
                     bmp = new Bitmap(ms); //создание Bitmap из byte[]
+                    //ToYCbCr(ref bmp); //перевод из RGB в YCbCr
                     ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
                     System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
                     EncoderParameters myEncoderParameters = new EncoderParameters(1);
@@ -101,6 +94,14 @@ namespace ImageResizer
             }
         }
 
+        public static void ResizeStandart(List<ResizeParameters> filePaths)
+        {
+            Parallel.ForEach(filePaths, (current) =>
+            {
+                ResizeStandart(current.FilePath, current.ResizeQuality);
+            });
+        }
+
         #region Вспомогательные методы
 
         private static ImageCodecInfo GetEncoder(ImageFormat format)
@@ -115,6 +116,41 @@ namespace ImageResizer
                 }
             }
             return null;
+        }
+
+        private static void ToYCbCr(ref Bitmap bmp)
+        {
+            int width = bmp.Width;
+            int height = bmp.Height;
+            byte[,] yData = new byte[width, height];                     //luma
+            byte[,] bData = new byte[width, height];                     //Cb
+            byte[,] rData = new byte[width, height];                     //Cr
+
+            unsafe
+            {
+                BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bmp.PixelFormat);
+                int heightInPixels = bitmapData.Height;
+                int widthInBytes = width * 3;
+                byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
+
+                //Convert to YCbCr
+                for (int y = 0; y < heightInPixels; y++)
+                {
+                    byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
+                    for (int x = 0; x < width; x++)
+                    {
+                        int xPor3 = x * 3;
+                        float blue = currentLine[xPor3++];
+                        float green = currentLine[xPor3++];
+                        float red = currentLine[xPor3];
+
+                        yData[x, y] = (byte)((0.299 * red) + (0.587 * green) + (0.114 * blue));
+                        bData[x, y] = (byte)(128 - (0.168736 * red) + (0.331264 * green) + (0.5 * blue));
+                        rData[x, y] = (byte)(128 + (0.5 * red) + (0.418688 * green) + (0.081312 * blue));
+                    }
+                }
+                bmp.UnlockBits(bitmapData);
+            }
         }
 
         #endregion
