@@ -65,14 +65,14 @@ namespace ImageResizer
                 int range4 = resizeableFiles.Where(p => p.FileSize >= range41 && p.FileSize <= range42).Count();
                 int range5 = resizeableFiles.Where(p => p.FileSize >= range51 && p.FileSize <= range52).Count();
                 int range6 = resizeableFiles.Where(p => p.FileSize >= range61 && p.FileSize <= range62).Count();
-                labelFilesTotal.Content = string.Format("Всего файлов в указанной директории : {0}", filePaths.Length);
-                labelFilesResizeable.Content = string.Format("Всего файлов размером более {0} Кб : {1}", maxFileSize, resizeableFiles.Count);
-                labelRange1.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range11, range12, range1);
-                labelRange2.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range21, range22, range2);
-                labelRange3.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range31, range32, range3);
-                labelRange4.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range41, range42, range4);
-                labelRange5.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range51, range52, range5);
-                labelRange6.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : {2}", range61, range62, range6);
+                labelFilesTotal.Content = string.Format("Всего файлов в указанной директории : \t{0}", filePaths.Length);
+                labelFilesResizeable.Content = string.Format("Всего файлов размером более {0} Кб : \t{1}", maxFileSize, resizeableFiles.Count);
+                labelRange1.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range11, range12, range1);
+                labelRange2.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range21, range22, range2);
+                labelRange3.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range31, range32, range3);
+                labelRange4.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range41, range42, range4);
+                labelRange5.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range51, range52, range5);
+                labelRange6.Content = string.Format("Файлов размером от {0} Кб до {1} Кб : \t{2}", range61, range62, range6);
             }
         }
 
