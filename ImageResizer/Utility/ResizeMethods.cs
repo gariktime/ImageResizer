@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageResizer.Utility;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -33,6 +34,21 @@ namespace ImageResizer
             return result;
         }
 
+        /// <summary>
+        /// Возвращает список полных имён файлов 
+        /// </summary>
+        /// <param name="filePaths"></param>
+        /// <param name="maxFileSize"></param>
+        /// <returns></returns>
+        public static List<ResizeParameters> GetResizeableFiles2(string[] filePaths, int maxFileSize)
+        {
+            List<ResizeParameters> result = new List<ResizeParameters>();
+
+
+
+            return result;
+        }
+
         public static void ResizeStandart(List<string> filePaths)
         {
             //Parallel.ForEach(filePaths, (currentFilePath) =>
@@ -48,23 +64,29 @@ namespace ImageResizer
         /// <param name="qualityValue">Уровень сжатия.</param>
         public static void ResizeStandart(string filePath, long qualityValue)
         {
-            Stream stream = new FileStream(filePath, FileMode.Open);
-            Bitmap bmp = new Bitmap(stream);
-            stream.Close();
-            bmp.Save(@"C:\Test\321.jpg");
+            Bitmap bmp = new Bitmap(filePath);
+            byte[] bmpData = null;
+
             try
             {
-                //using (Bitmap bmp2 = new Bitmap(filePath))
-                //{
-                //    bmp = (Bitmap)bmp2.Clone();
-                //}
-                ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
-                System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
-                EncoderParameters myEncoderParameters = new EncoderParameters(1);
-                EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 50L);
-                myEncoderParameters.Param[0] = myEncoderParameter;
-                bmp.Save(@"C:\Test\123.jpg");
-                //bmp.Save(@"C:\Test\123.jpg", jpgEncoder, myEncoderParameters);
+                //конвертация изображения в byte[]
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    bmp.Save(ms, ImageFormat.Bmp);
+                    bmpData = ms.ToArray();
+                    bmp.Dispose();
+                }
+                //изменение изображения
+                using (MemoryStream ms = new MemoryStream(bmpData))
+                {
+                    bmp = new Bitmap(ms); //создание Bitmap из byte[]
+                    ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+                    System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                    EncoderParameters myEncoderParameters = new EncoderParameters(1);
+                    EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, qualityValue); //степень сжатия
+                    myEncoderParameters.Param[0] = myEncoderParameter;
+                    bmp.Save(filePath, jpgEncoder, myEncoderParameters); //сохранение изображения с указанными изменениями
+                }
             }
             catch
             {
@@ -74,11 +96,12 @@ namespace ImageResizer
             {
                 if (bmp != null)
                 {
-                    //stream.Dispose();
                     bmp.Dispose();
                 }
             }
         }
+
+        #region Вспомогательные методы
 
         private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
@@ -93,5 +116,8 @@ namespace ImageResizer
             }
             return null;
         }
+
+        #endregion
+
     }
 }
